@@ -1,0 +1,10 @@
+Maven for pom.xml
+
+jar file
+javax.mail.jar	
+groupId
+com.sun.mail 	
+artifactId
+javax.mail 	
+Description
+The JavaMail reference implementation jar file, including the SMTP, IMAP, and POP3 protocol provid
