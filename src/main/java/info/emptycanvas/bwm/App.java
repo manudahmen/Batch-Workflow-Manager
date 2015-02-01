@@ -1,26 +1,8 @@
-package info.emptycanvas.wmb;
-interface AppListener
-{
-  
-}
-class ByMailListener implements AppListener, Runnable
-{
-  public ByMailListener(String username, String password, String host, int port)
-  {
-    configure(String username, String password, String host, int port);
-  }
-  public void configure(String username, String password, String host, int port)
-  {
-    
-  }
-  public void run()
-  {
-    while(app.isRunning())
-    {
-      
-    }
-  }
-}
+package info.emptycanvas.bwm;
+
+import java.util.ArrayList;
+import java.util.List;
+
 
 public class App implements Runnable
 {
@@ -36,17 +18,24 @@ public class App implements Runnable
   {
     
   }
-  public void listen(AppListener msg)
+  public void registerListener(AppListener msg)
   {
   }
   public void run()
   {
     
   }
+
+    public boolean isRunning() {
+        return running;
+    }
+  
+  
+  
   public static void main(String [] args)
   {
     App app = new App();
     new Thread(app).start();
-    app.listen(new ByEmailListener()
+    app.registerListener(new ByEmailListener("dahmen.manuel", "sas", "scarlet.be", 21));
   }
 }
