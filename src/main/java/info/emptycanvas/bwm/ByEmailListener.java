@@ -31,20 +31,25 @@ public class ByEmailListener implements AppListener, Runnable{
     
   }
     public static void main(String[] args) {
+        EmailAccount ea = new EmailAccount(null);
+
         Properties props = new Properties();
-        props.setProperty("mail.store.protocol", "pop3");
+        props.setProperty("mail.store.protocol", ea.getProtocol());
+        
+        
+        
         try {
             Authenticator auth = new Authenticator() {};
-            Session session = Session.getInstance(props, new javax.mail.Authenticator() {
+            Session session = Session.getInstance(props, null/*new javax.mail.Authenticator() {
             protected PasswordAuthentication getPasswordAuthentication() {
                return new PasswordAuthentication(
                   "md500082@scarlet.be", "sposmes1");
             }
-            }
+            }*/
             );
             
             Store store = session.getStore();
-            store.connect("pop.scarlet.be", 995, "md500082@scarlet.be", "sposmes1");
+            store.connect(ea.getServer(), ea.getPort(), ea.getUsername(), ea.getPassword());
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
             Message msg = inbox.getMessage(inbox.getMessageCount());
