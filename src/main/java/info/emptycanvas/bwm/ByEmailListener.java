@@ -36,77 +36,77 @@ public class ByEmailListener implements AppListener, Runnable {
     }
 
     public static void main(String[] args) {
-            EmailAccount ea = new EmailAccount(null);
-            
-            Properties props = new Properties();
-            props.setProperty("mail.store.protocol", ea.getProtocol());
-            
-            Authenticator auth = new Authenticator() {
-            };
-            Session session = Session.getInstance(props, null/*new javax.mail.Authenticator() {
-                    protected PasswordAuthentication getPasswordAuthentication() {
-                    return new PasswordAuthentication(
-                    "md500082@scarlet.be", "sposmes1");
-                    }
-                    }*/
-            );
-            
-            Store store = null;
-            try {
-                store = session.getStore();
-            } catch (NoSuchProviderException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                store.connect(ea.getServer(), ea.getPort(), ea.getUsername(), ea.getPassword());
-            } catch (MessagingException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            Folder inbox = null;
-            try {
-                inbox = store.getFolder("INBOX");
-            } catch (MessagingException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            try {
-                inbox.open(Folder.READ_ONLY);
-            } catch (MessagingException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            Message msg = null;
-            try {
-                msg = inbox.getMessage(inbox.getMessageCount());
-            } catch (MessagingException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            Address[] in = null;
-            try {
-                in = msg.getFrom();
-            } catch (MessagingException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            for (Address address : in) {
-                System.out.println("FROM:" + address.toString());
-            }
-            Multipart mp = null;
-            try {
-                mp = (Multipart) msg.getContent();
-            } catch (IOException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (MessagingException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            }
-            BodyPart bp = null;
-            try {
-                bp = mp.getBodyPart(0);
-            } catch (MessagingException ex) {
-                Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-            }
-         try {
-           System.out.println("SENT DATE:" + msg.getSentDate());
+        EmailAccount ea = new EmailAccount(null);
+
+        Properties props = new Properties();
+        props.setProperty("mail.store.protocol", ea.getProtocol());
+        props.setProperty("mail.pop3.ssl.enable", "false");
+        props.setProperty("mail.pop3.starttls.enable", "true");
+        props.setProperty("mail.pop3.starttls.required", "true");
+        props.put("mail.store.protocol", "pop3");
+        props.put("mail.pop3.host", ea.getServer());
+        props.put("mail.pop3.port", "995");
+        props.put("mail.pop3.starttls.enable", "true");
+        
+        Session session = Session.getInstance(props, null);
+        session.setDebug(true);
+
+        Store store = null;
+        try {
+            store = session.getStore();
+        } catch (NoSuchProviderException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            store.connect(ea.getServer(), ea.getPort(), ea.getUsername(), ea.getPassword());
+        } catch (MessagingException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Folder inbox = null;
+        try {
+            inbox = store.getFolder("INBOX");
+        } catch (MessagingException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            inbox.open(Folder.READ_ONLY);
+        } catch (MessagingException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Message msg = null;
+        try {
+            msg = inbox.getMessage(inbox.getMessageCount());
+        } catch (MessagingException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Address[] in = null;
+        try {
+            in = msg.getFrom();
+        } catch (MessagingException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        for (Address address : in) {
+            System.out.println("FROM:" + address.toString());
+        }
+        Multipart mp = null;
+        try {
+            mp = (Multipart) msg.getContent();
+        } catch (IOException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (MessagingException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        BodyPart bp = null;
+        try {
+            bp = mp.getBodyPart(0);
+        } catch (MessagingException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        try {
+            System.out.println("SENT DATE:" + msg.getSentDate());
             System.out.println("SUBJECT:" + msg.getSubject());
             System.out.println("CONTENT:" + bp.getContent());
-            
+
         } catch (IOException ex) {
             Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
         } catch (MessagingException ex) {
