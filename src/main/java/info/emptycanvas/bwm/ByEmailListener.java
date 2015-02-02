@@ -65,12 +65,12 @@ public class ByEmailListener implements AppListener, Runnable {
             props.setProperty("mail.pop3.starttls.required", "false");
             props.put("mail.store.protocol", "pop3");
             props.put("mail.pop3.host", ea.getServer());
-            props.put("mail.pop3.port", 995);
-            props.put("mail.pop3s.ssl.checkserveridentity", "false");
-            props.put("mail.pop3s.ssl.trust", "*");
+            props.put("mail.pop3.port", "995");
+            props.put("mail.pop3s.ssl.checkserveridentity", "true");
+            props.put("mail.pop3s.ssl.trust", ea.getServer());
             POP3Authentificator poP3Authentificator = new POP3Authentificator(ea.getUsername(), ea.getPassword());
             Session session = Session.getInstance(props, poP3Authentificator);
-            //session.setDebug(true);
+            session.setDebug(true);
 
             Store store;
             store = session.getStore("pop3s");
