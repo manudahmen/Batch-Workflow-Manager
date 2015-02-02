@@ -1,4 +1,4 @@
-mail.store.protocol=pop3s
+mail.store.protocol=pop3
 server=pop.scarlet.be
 port=995
 username=md500082@scarlet.be

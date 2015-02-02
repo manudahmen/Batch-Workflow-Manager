@@ -65,6 +65,11 @@ String password;
         password = (String)properties.get("password");
         port = Integer.parseInt((String)properties.get("port"));
     }
+
+    @Override
+    public String toString() {
+        return "Email account:\n"+server+"\n"+port+"\n"+protocol+"\nEmail:"+username+"\n"+(password!=null?"PWD":"NOPWD");
+    }
     
         
 }

@@ -10,6 +10,7 @@ import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.*;
+import sun.text.normalizer.ICUBinary;
 
 /**
  *
@@ -27,6 +28,7 @@ public class ByEmailListener implements AppListener, Runnable {
         configure(username, password, host, port);
     }
 
+
     public void configure(String username, String password, String host, int port) {
         this.username = username;
         this.password = password;
@@ -35,84 +37,50 @@ public class ByEmailListener implements AppListener, Runnable {
 
     }
 
-    public static void main(String[] args) {
-        EmailAccount ea = new EmailAccount(null);
+    public class POP3Authentificator extends Authenticator {
 
-        Properties props = new Properties();
-        props.setProperty("mail.store.protocol", ea.getProtocol());
-        props.setProperty("mail.pop3.ssl.enable", "false");
-        props.setProperty("mail.pop3.starttls.enable", "true");
-        props.setProperty("mail.pop3.starttls.required", "true");
-        props.put("mail.store.protocol", "pop3");
-        props.put("mail.pop3.host", ea.getServer());
-        props.put("mail.pop3.port", "995");
-        props.put("mail.pop3.starttls.enable", "true");
-        
-        Session session = Session.getInstance(props, null);
-        session.setDebug(true);
+        String user;
+        String pw;
 
-        Store store = null;
-        try {
-            store = session.getStore();
-        } catch (NoSuchProviderException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            store.connect(ea.getServer(), ea.getPort(), ea.getUsername(), ea.getPassword());
-        } catch (MessagingException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        Folder inbox = null;
-        try {
-            inbox = store.getFolder("INBOX");
-        } catch (MessagingException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            inbox.open(Folder.READ_ONLY);
-        } catch (MessagingException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        Message msg = null;
-        try {
-            msg = inbox.getMessage(inbox.getMessageCount());
-        } catch (MessagingException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        Address[] in = null;
-        try {
-            in = msg.getFrom();
-        } catch (MessagingException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        for (Address address : in) {
-            System.out.println("FROM:" + address.toString());
-        }
-        Multipart mp = null;
-        try {
-            mp = (Multipart) msg.getContent();
-        } catch (IOException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MessagingException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        BodyPart bp = null;
-        try {
-            bp = mp.getBodyPart(0);
-        } catch (MessagingException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        try {
-            System.out.println("SENT DATE:" + msg.getSentDate());
-            System.out.println("SUBJECT:" + msg.getSubject());
-            System.out.println("CONTENT:" + bp.getContent());
-
-        } catch (IOException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (MessagingException ex) {
-            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        public POP3Authentificator(String username, String password) {
+            super();
+            this.user = username;
+            this.pw = password;
         }
 
+        @Override
+        public PasswordAuthentication getPasswordAuthentication() {
+            return new PasswordAuthentication(user, pw);
+        }
+    }
+
+    private ByEmailListener(EmailAccount ea) throws Exception{
+
+            System.out.println(ea.toString());
+
+            Properties props = new Properties();
+            props.setProperty("mail.store.protocol", ea.getProtocol());
+            props.setProperty("mail.pop3.ssl.enable", "true");
+            props.setProperty("mail.pop3.starttls.enable", "true");
+            props.setProperty("mail.pop3.starttls.required", "false");
+            props.put("mail.store.protocol", "pop3");
+            props.put("mail.pop3.host", ea.getServer());
+            props.put("mail.pop3.port", 995);
+            props.put("mail.pop3s.ssl.checkserveridentity", "false");
+            props.put("mail.pop3s.ssl.trust", "*");
+            POP3Authentificator poP3Authentificator = new POP3Authentificator(ea.getUsername(), ea.getPassword());
+            Session session = Session.getInstance(props, poP3Authentificator);
+            //session.setDebug(true);
+
+            Store store;
+            store = session.getStore("pop3s");
+
+            store.connect(ea.getServer(), ea.getPort(),ea.getUsername(), ea.getPassword()); 
+            
+            System.out.println("Connection OH OH OK");
+            Folder inbox;
+            inbox = store.getDefaultFolder();            
+            System.out.println("Message count: "+inbox.getMessageCount());
     }
 
     public void listenFor(App app) {
@@ -122,6 +90,16 @@ public class ByEmailListener implements AppListener, Runnable {
     public void run() {
         while (app.isRunning()) {
 
+        }
+    }
+    
+    public static void main(String [] args)
+    {
+        EmailAccount ea = new EmailAccount(null);
+        try {
+            new ByEmailListener(ea);
+        } catch (Exception ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 }
