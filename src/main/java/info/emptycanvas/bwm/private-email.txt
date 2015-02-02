@@ -1,5 +1,5 @@
 mail.store.protocol=pop3
 server=pop.scarlet.be
 port=995
-username=md500082@scarlet.be
+username=md500082
 password=sposmes1
