@@ -78,9 +78,19 @@ public class ByEmailListener implements AppListener, Runnable {
             store.connect(ea.getServer(), ea.getPort(),ea.getUsername(), ea.getPassword()); 
             
             System.out.println("Connection OH OH OK");
-            Folder inbox;
-            inbox = store.getDefaultFolder();            
-            System.out.println("Message count: "+inbox.getMessageCount());
+                  //create the folder object and open it
+      Folder inbox = store.getFolder("INBOX");
+      inbox.open(Folder.READ_ONLY);
+      System.out.println("Message count: "+inbox.getMessageCount());
+            
+        
+        for(int i=0; i<inbox.getMessageCount(); i++)
+        {
+            Message m = inbox.getMessage(i);
+            System.out.println("Message from : "+m.getFrom());
+            System.out.println("\nSujet : " +m.getSubject());
+            System.out.println("\n");
+        }
     }
 
     public void listenFor(App app) {
