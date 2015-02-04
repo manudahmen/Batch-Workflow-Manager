@@ -20,6 +20,7 @@ public class App implements Runnable
   }
   public void registerListener(AppListener msg)
   {
+      this.listener.add(msg);
   }
   public void run()
   {
@@ -36,6 +37,6 @@ public class App implements Runnable
   {
     App app = new App();
     new Thread(app).start();
-    app.registerListener(new ByEmailListener("dahmen.manuel", "sas", "scarlet.be", 21));
+    app.registerListener(new ByEmailListener());
   }
 }

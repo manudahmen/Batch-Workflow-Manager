@@ -5,12 +5,10 @@
  */
 package info.emptycanvas.bwm;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.mail.*;
-import sun.text.normalizer.ICUBinary;
 
 /**
  *
@@ -23,11 +21,57 @@ public class ByEmailListener implements AppListener, Runnable {
     private String password;
     private String server;
     private int port;
+    private Session session;
 
-    public ByEmailListener(String username, String password, String host, int port) {
-        configure(username, password, host, port);
-    }
+    public ByEmailListener() {
+        try {
+            EmailAccount ea = new EmailAccount(null);
+            Properties props = new Properties();
+            props.setProperty("mail.store.protocol", ea.getProtocol());
+            props.setProperty("mail.pop3.ssl.enable", "true");
+            props.setProperty("mail.pop3.starttls.enable", "true");
+            props.setProperty("mail.pop3.starttls.required", "false");
+            props.put("mail.store.protocol", "pop3");
+            props.put("mail.pop3.host", ea.getServer());
+            props.put("mail.pop3.port", "995");
+            props.put("mail.pop3s.ssl.checkserveridentity", "true");
+            props.put("mail.pop3s.ssl.trust", ea.getServer());
+            POP3Authentificator poP3Authentificator = new POP3Authentificator(ea.getUsername(), ea.getPassword());
+            this.session = Session.getInstance(props, poP3Authentificator);
+            System.out.println(ea.toString());
 
+            session.setDebug(true);
+
+            Store store;
+            store = session.getStore("pop3s");
+            
+            store.connect(ea.getServer(), ea.getPort(),ea.getUsername(), ea.getPassword());
+            
+            System.out.println("Connection OH OH OK");
+            //create the folder object and open it
+            Folder inbox = store.getFolder("INBOX");
+            inbox.open(Folder.READ_ONLY);
+            System.out.println("Message count: "+inbox.getMessageCount());
+            
+            
+            for(int i=1; i<=inbox.getMessageCount(); i++)
+            {
+                                    Message m = inbox.getMessage(i);
+                                    
+                try {
+                    new MessageAction(m).setVisible(true);
+                } catch (Exception ex) {
+                    Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                
+                    System.out.println("Message from : "+m.getFrom()[0]);
+                    System.out.println("\nSujet : " +m.getSubject());
+                    System.out.println("\n");
+            }
+        } catch (MessagingException ex) {
+            Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+ }
 
     public void configure(String username, String password, String host, int port) {
         this.username = username;
@@ -53,46 +97,6 @@ public class ByEmailListener implements AppListener, Runnable {
             return new PasswordAuthentication(user, pw);
         }
     }
-
-    private ByEmailListener(EmailAccount ea) throws Exception{
-
-            System.out.println(ea.toString());
-
-            Properties props = new Properties();
-            props.setProperty("mail.store.protocol", ea.getProtocol());
-            props.setProperty("mail.pop3.ssl.enable", "true");
-            props.setProperty("mail.pop3.starttls.enable", "true");
-            props.setProperty("mail.pop3.starttls.required", "false");
-            props.put("mail.store.protocol", "pop3");
-            props.put("mail.pop3.host", ea.getServer());
-            props.put("mail.pop3.port", "995");
-            props.put("mail.pop3s.ssl.checkserveridentity", "true");
-            props.put("mail.pop3s.ssl.trust", ea.getServer());
-            POP3Authentificator poP3Authentificator = new POP3Authentificator(ea.getUsername(), ea.getPassword());
-            Session session = Session.getInstance(props, poP3Authentificator);
-            session.setDebug(true);
-
-            Store store;
-            store = session.getStore("pop3s");
-
-            store.connect(ea.getServer(), ea.getPort(),ea.getUsername(), ea.getPassword()); 
-            
-            System.out.println("Connection OH OH OK");
-                  //create the folder object and open it
-      Folder inbox = store.getFolder("INBOX");
-      inbox.open(Folder.READ_ONLY);
-      System.out.println("Message count: "+inbox.getMessageCount());
-            
-        
-        for(int i=0; i<inbox.getMessageCount(); i++)
-        {
-            Message m = inbox.getMessage(i);
-            System.out.println("Message from : "+m.getFrom());
-            System.out.println("\nSujet : " +m.getSubject());
-            System.out.println("\n");
-        }
-    }
-
     public void listenFor(App app) {
         this.app = app;
     }
@@ -107,7 +111,7 @@ public class ByEmailListener implements AppListener, Runnable {
     {
         EmailAccount ea = new EmailAccount(null);
         try {
-            new ByEmailListener(ea);
+            ByEmailListener byEmailListener = new ByEmailListener();
         } catch (Exception ex) {
             Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
         }
