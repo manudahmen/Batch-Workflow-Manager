@@ -44,34 +44,35 @@ public class ByEmailListener implements AppListener, Runnable {
 
             Store store;
             store = session.getStore("pop3s");
-            
-            store.connect(ea.getServer(), ea.getPort(),ea.getUsername(), ea.getPassword());
-            
+
+            store.connect(ea.getServer(), ea.getPort(), ea.getUsername(), ea.getPassword());
+
             System.out.println("Connection OH OH OK");
             //create the folder object and open it
             Folder inbox = store.getFolder("INBOX");
             inbox.open(Folder.READ_ONLY);
-            System.out.println("Message count: "+inbox.getMessageCount());
-            
-            
-            for(int i=1; i<=inbox.getMessageCount(); i++)
-            {
-                                    Message m = inbox.getMessage(i);
-                                    
+            System.out.println("Message count: " + inbox.getMessageCount());
+
+            for (int i = 1; i <= inbox.getMessageCount(); i++) {
+                Message m = inbox.getMessage(i);
+                MessageAction messageAction = null;
                 try {
-                    new MessageAction(m).setVisible(true);
+                    messageAction = new MessageAction(m);
+                    
+                    messageAction.setVisible(true);
+                    
                 } catch (Exception ex) {
                     Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
-                
-                    System.out.println("Message from : "+m.getFrom()[0]);
-                    System.out.println("\nSujet : " +m.getSubject());
-                    System.out.println("\n");
+
+                System.out.println("Message from : " + m.getFrom()[0]);
+                System.out.println("\nSujet : " + m.getSubject());
+                System.out.println("\n");
             }
         } catch (MessagingException ex) {
             Logger.getLogger(ByEmailListener.class.getName()).log(Level.SEVERE, null, ex);
         }
- }
+    }
 
     public void configure(String username, String password, String host, int port) {
         this.username = username;
@@ -97,6 +98,7 @@ public class ByEmailListener implements AppListener, Runnable {
             return new PasswordAuthentication(user, pw);
         }
     }
+
     public void listenFor(App app) {
         this.app = app;
     }
@@ -106,9 +108,8 @@ public class ByEmailListener implements AppListener, Runnable {
 
         }
     }
-    
-    public static void main(String [] args)
-    {
+
+    public static void main(String[] args) {
         EmailAccount ea = new EmailAccount(null);
         try {
             ByEmailListener byEmailListener = new ByEmailListener();
